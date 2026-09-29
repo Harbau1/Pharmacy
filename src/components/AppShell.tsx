@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { BarChart3, Boxes, LayoutDashboard, LogOut, PackagePlus, ShoppingCart } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
+import { db } from "@/lib/store";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -42,6 +43,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       }
     }
 
+    db.reset();
     localStorage.removeItem("pharmacy_token");
     localStorage.removeItem("pharmacy_user");
     navigate({ to: "/login" });
