@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { HeldSale, Product, Sale } from "./types";
 import { SEED_PRODUCTS, seedSales } from "./seed";
+import { isSupabaseConfigured } from "./supabase";
 import {
   deleteProductFromSupabase,
   syncFromSupabase,
@@ -21,9 +22,11 @@ function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) {
-      localStorage.setItem(key, JSON.stringify(fallback));
-      return fallback;
+    if (raw === null) {
+      // If Supabase is configured, use empty array as initial fallback so we don't display stale seed data
+      const initial = isSupabaseConfigured() && Array.isArray(fallback) ? ([] as unknown as T) : fallback;
+      localStorage.setItem(key, JSON.stringify(initial));
+      return initial;
     }
     return JSON.parse(raw) as T;
   } catch {
@@ -38,8 +41,8 @@ function write<T>(key: string, value: T) {
 }
 
 export const db = {
-  products: () => read<Product[]>(KEY_P, SEED_PRODUCTS),
-  sales: () => read<Sale[]>(KEY_S, seedSales() as Sale[]),
+  products: () => read<Product[]>(KEY_P, isSupabaseConfigured() ? [] : SEED_PRODUCTS),
+  sales: () => read<Sale[]>(KEY_S, isSupabaseConfigured() ? [] : (seedSales() as Sale[])),
   held: () => read<HeldSale[]>(KEY_H, []),
   setProducts: (p: Product[]) => write(KEY_P, p),
   setSales: (s: Sale[]) => write(KEY_S, s),

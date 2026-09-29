@@ -3,8 +3,8 @@ import { isSupabaseConfigured, supabase } from "./supabase";
 import type { HeldSale, Product, Sale } from "./types";
 
 /**
- * Hydrates local cache (localStorage) with data from Supabase.
- * If Supabase is empty, seeds Supabase with existing local seed data.
+ * Hydrates local cache (localStorage) directly from Supabase.
+ * Whatever exists in Supabase (even if empty after deletion) is authoritative.
  */
 export async function syncFromSupabase(): Promise<{ success: boolean; message?: string }> {
   if (!isSupabaseConfigured()) {
@@ -21,14 +21,9 @@ export async function syncFromSupabase(): Promise<{ success: boolean; message?: 
 
     if (pError) {
       console.error("Failed to fetch products from Supabase:", pError);
-    } else if (remoteProducts && remoteProducts.length > 0) {
-      db.setProducts(remoteProducts as Product[]);
     } else {
-      // Seed Supabase if remote table is empty
-      const localProducts = db.products();
-      if (localProducts.length > 0) {
-        await supabase.from("products").upsert(localProducts);
-      }
+      // Always sync local cache to match Supabase state
+      db.setProducts((remoteProducts as Product[]) || []);
     }
 
     // 2. Sync Sales
@@ -39,14 +34,9 @@ export async function syncFromSupabase(): Promise<{ success: boolean; message?: 
 
     if (sError) {
       console.error("Failed to fetch sales from Supabase:", sError);
-    } else if (remoteSales && remoteSales.length > 0) {
-      db.setSales(remoteSales as Sale[]);
     } else {
-      // Seed Supabase if remote sales table is empty
-      const localSales = db.sales();
-      if (localSales.length > 0) {
-        await supabase.from("sales").upsert(localSales);
-      }
+      // Always sync local sales cache to match Supabase state
+      db.setSales((remoteSales as Sale[]) || []);
     }
 
     // 3. Sync Held Sales
@@ -57,8 +47,8 @@ export async function syncFromSupabase(): Promise<{ success: boolean; message?: 
 
     if (hError) {
       console.error("Failed to fetch held sales from Supabase:", hError);
-    } else if (remoteHeld && remoteHeld.length > 0) {
-      db.setHeld(remoteHeld as HeldSale[]);
+    } else {
+      db.setHeld((remoteHeld as HeldSale[]) || []);
     }
 
     return { success: true };
