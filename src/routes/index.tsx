@@ -11,8 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { AlertTriangle, CalendarClock, PackageX, RefreshCw, Search, TrendingUp } from "lucide-react";
-import { toast } from "sonner";
+import { AlertTriangle, CalendarClock, PackageX, Search, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useProducts, useSales, naira, daysToExpiry, stockStatus, hydrateFromSupabase } from "@/lib/store";
 
@@ -70,19 +69,10 @@ function Dashboard() {
   const products = useProducts();
   const sales = useSales();
   const [q, setQ] = useState("");
-  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     hydrateFromSupabase().catch(() => {});
   }, []);
-
-  const handleSync = async () => {
-    setSyncing(true);
-    const res = await hydrateFromSupabase();
-    setSyncing(false);
-    if (res.success) toast.success("Data synced with Supabase");
-    else toast.error(res.message || "Sync failed");
-  };
 
   const stats = useMemo(() => {
     if (!products || !sales) return null;
@@ -156,22 +146,12 @@ function Dashboard() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Overview of stock and sales performance</p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-foreground shadow-sm hover:bg-secondary disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "Syncing..." : "Sync DB"}
-          </button>
-          <Link
-            to="/pos"
-            className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-          >
-            New Sale
-          </Link>
-        </div>
+        <Link
+          to="/pos"
+          className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
+        >
+          New Sale
+        </Link>
       </div>
 
       <div className="relative mb-6">
