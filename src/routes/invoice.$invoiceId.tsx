@@ -83,6 +83,7 @@ function InvoicePage() {
         <table className="mt-6 w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
+              <th className="py-2 pr-3">S/N</th>
               <th className="py-2">Item</th>
               <th className="py-2">Qty</th>
               <th className="py-2">Price Type</th>
@@ -93,6 +94,7 @@ function InvoicePage() {
           <tbody>
             {sale.items_sold.map((i, idx) => (
               <tr key={idx} className="border-b border-border/60">
+                <td className="py-2.5 pr-3">{idx + 1}</td>
                 <td className="py-2.5">{i.name}</td>
                 <td className="py-2.5">{i.qty}</td>
                 <td className="py-2.5 capitalize">{i.price_type}</td>
